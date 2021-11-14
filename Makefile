@@ -1,5 +1,5 @@
 # set some variables
-BLDDIR := build
+BLDDIR := bundle
 
 # what are we running on
 ifeq ($(OS),Windows_NT) 
@@ -19,42 +19,33 @@ run:
 
 
 
-
 build:
-	mkdir $(BLDDIR)
+	mkdir -p $(BLDDIR)
 	
 ifeq ($(DETECTED_OS),Linux) 
-	$(MAKE) transpile_linux
-	$(MAKE) compile_linux
+	$(MAKE) bundle_linux
+else ifeq ($(DETECTED_OS),Darwin) 
+	$(MAKE) bundle_darvin
+else ifeq ($(DETECTED_OS),Windows) 
+	$(MAKE) bundle_windows
 else
 	$(error "Not yet supported!")
 endif
 
 
 
-transpile_linux: SSC/ssc.py
-	cython3 --embed -3 SSC/ssc.py -o build/ssc.c
+bundle_linux: SSC/ssc.py
+	pyinstaller --workpath bundle/build --distpath bundle/dist --clean --onefile --name ssc_linux SSC/ssc.py
 
-transpile_darvin: SSC/ssc.py
-	cython3 --embed -3 SSC/ssc.py -o build/ssc.c
+bundle_darvin: SSC/ssc.py
+	pyinstaller --workpath bundle/build --distpath bundle/dist --clean --onefile --name ssc_darvin SSC/ssc.py
 
-transpile_windows: SSC\ssc.py
-	cython3 --embed -3 SSC\ssc.py -o build\ssc.c
-
-
-
-compile_linux:
-	gcc -static -o build/ssc build/ssc.c -Os -I /usr/include/python3.8 $(pkg-config --libs --cflags python3) -lm -lutil -ldl -lz -lexpat -lpthread -lc
-#	gcc -static -o build/ssc build/ssc.c -Os -I /usr/include/python3.8 -lpython3.8 -lpthread -lm -lutil -ldl
-
-compile_darvin:
-	gcc -o ssc ssc.c -Os -I /usr/include/python3.8 -lpython3.8 -lpthread -lm -lutil -ldl
-
-compile_windows:
-	gcc -o ssc ssc.c -Os -I /usr/include/python3.8 -lpython3.8 -lpthread -lm -lutil -ldl
+bundle_windows: SSC\ssc.py
+	pyinstaller --workpath bundle\build --distpath bundle\dist --clean --onefile --name ssc_windows SSC\ssc.py
 
 
 
 clean:
 	rm -r -f $(BLDDIR)
+	rm -r -f SSC/__pycache__
 
