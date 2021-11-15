@@ -100,11 +100,17 @@ class SSC(tk.Frame):
                 ui_update = False
 
             if ui_update:
+                # save scrollbar state to handle autoscroll
+                scrollbar_state_y_previous = self.scrollbar_display_text.get()[1]
+
                 if self.check_receive_timestamp_varible.get():
                     self.text_display_content.insert(
                         tk.END, "[" + msg_time.strftime("%H:%M:%S.%f")[:-3] + "] ")
                 self.text_display_content.insert(tk.END, msg_data)
-                self.text_display_content.see(tk.END)
+
+                if scrollbar_state_y_previous == 1.0:
+                    # only scroll text to botom if already showing bottom
+                    self.text_display_content.see(tk.END)
 
     def worker_communication(self, thread_event, serial_reference):
         """
@@ -174,6 +180,7 @@ class SSC(tk.Frame):
         self.scrollbar_display_text = ttk.Scrollbar(
             self.frame_display, command=self.text_display_content.yview)
         self.scrollbar_display_text.pack(side='left', fill='y')
+        self.text_display_content['yscrollcommand'] = self.scrollbar_display_text.set
 
         # receive - receive control, formatting, ...
         self.check_receive_timestamp_varible = tk.BooleanVar()
