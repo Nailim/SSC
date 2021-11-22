@@ -12,6 +12,7 @@ from tkinter import ttk
 import queue
 
 import threading
+from tkinter.constants import TRUE
 
 import serial
 from serial.tools import list_ports
@@ -38,10 +39,12 @@ class SSC(tk.Frame):
 
         # initialize the main window
         root.title("SimpleSerialConsole")
-        root.minsize(300, 150)
+        root.minsize(720, 480)
+        root.geometry("720x480")
+
         # insert themed frame on root window for consistent appearance
         self.frame_root = ttk.Frame(root)
-        self.frame_root.pack(fill='both', expand=True)
+        self.frame_root.pack(fill=tk.BOTH, expand=True)
 
         # compose window GUI
         self.compose_gui()
@@ -174,7 +177,7 @@ class SSC(tk.Frame):
         self.combo_control_baudrate.pack(side='left')
 
         # display - display serial output ...
-        self.text_display_content = tk.Text(self.frame_display)
+        self.text_display_content = tk.Text(self.frame_display, height=19)
         self.text_display_content.pack(side='left', fill='both', expand=True)
 
         self.scrollbar_display_text = ttk.Scrollbar(
@@ -224,11 +227,11 @@ class SSC(tk.Frame):
         self.listbox_history.pack(fill='both', expand=True)
 
         # assemble frames into main window
-        self.frame_control.pack(fill='x', expand=True)
-        self.frame_display.pack(fill='both', expand=True)
-        self.frame_receive.pack(fill='x', expand=True)
-        self.frame_transmit.pack(fill='x', expand=True)
-        self.frame_history.pack(fill='x', expand=True)
+        self.frame_control.pack(side=tk.TOP, fill=tk.X, expand=False)
+        self.frame_display.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        self.frame_receive.pack(side=tk.TOP, fill=tk.X, expand=False)
+        self.frame_transmit.pack(side=tk.TOP, fill=tk.X, expand=False)
+        self.frame_history.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
         # populate menus
         self.combo_control_port_update()
