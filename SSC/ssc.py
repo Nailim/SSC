@@ -154,7 +154,7 @@ class SSC(tk.Frame):
         self.button_control_connection = ttk.Button(
             self.frame_control, command=self.button_control_connection_handle,
             text="open")
-        self.button_control_connection.pack(side='left')
+        self.button_control_connection.pack(side=tk.LEFT)
 
         self.combo_control_port_variable = tk.StringVar()
         self.combo_control_port = ttk.Combobox(
@@ -164,7 +164,7 @@ class SSC(tk.Frame):
         self.combo_control_port.bind(
             '<<ComboboxSelected>>',
             self.combo_control_port_bind_select)
-        self.combo_control_port.pack(side='left')
+        self.combo_control_port.pack(side=tk.LEFT)
 
         self.combo_control_baudrate_variable = tk.StringVar()
         self.combo_control_baudrate = ttk.Combobox(
@@ -174,15 +174,15 @@ class SSC(tk.Frame):
         self.combo_control_baudrate.bind(
             '<<ComboboxSelected>>',
             self.combo_control_baudrate_bind_select)
-        self.combo_control_baudrate.pack(side='left')
+        self.combo_control_baudrate.pack(side=tk.LEFT)
 
         # display - display serial output ...
         self.text_display_content = tk.Text(self.frame_display, height=19)
-        self.text_display_content.pack(side='left', fill='both', expand=True)
+        self.text_display_content.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         self.scrollbar_display_text = ttk.Scrollbar(
             self.frame_display, command=self.text_display_content.yview)
-        self.scrollbar_display_text.pack(side='left', fill='y')
+        self.scrollbar_display_text.pack(side=tk.LEFT, fill=tk.Y)
         self.text_display_content['yscrollcommand'] = self.scrollbar_display_text.set
 
         # receive - receive control, formatting, ...
@@ -190,14 +190,14 @@ class SSC(tk.Frame):
         self.check_receive_timestamp = ttk.Checkbutton(
             self.frame_receive,
             variable=self.check_receive_timestamp_varible, text='timestamp')
-        self.check_receive_timestamp.pack(side='left')
+        self.check_receive_timestamp.pack(side=tk.LEFT)
 
         # tansmit - transit control, data ...
         self.entry_transmit_data_variable = tk.StringVar()
         self.entry_transmit_data = ttk.Entry(
             self.frame_transmit,
             textvariable=self.entry_transmit_data_variable)
-        self.entry_transmit_data.pack(side='left')
+        self.entry_transmit_data.pack(side=tk.LEFT)
 
         option_transmit_ending_list = ('NONE', ' CR ', ' LF ', 'CRLF')
         self.option_transmit_ending_variable = tk.StringVar()
@@ -206,12 +206,12 @@ class SSC(tk.Frame):
             self.option_transmit_ending_variable,
             option_transmit_ending_list[0],
             *option_transmit_ending_list)
-        self.option_transmit_ending.pack(side='left')
+        self.option_transmit_ending.pack(side=tk.LEFT)
 
         self.button_transmit_data = ttk.Button(
             self.frame_transmit, command=self.button_transmit_data_handle,
             text="send")
-        self.button_transmit_data.pack(side='right')
+        self.button_transmit_data.pack(side=tk.RIGHT)
 
         # history - show and use previous data in transmission
         self.listbox_history_variable = tk.StringVar()
@@ -224,7 +224,7 @@ class SSC(tk.Frame):
         self.listbox_history.bind(
             '<Double-Button-1>',
             self.listbox_history_bind_double_button)
-        self.listbox_history.pack(fill='both', expand=True)
+        self.listbox_history.pack(fill=tk.BOTH, expand=True)
 
         # assemble frames into main window
         self.frame_control.pack(side=tk.TOP, fill=tk.X, expand=False)
