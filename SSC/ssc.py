@@ -3,8 +3,8 @@ Simple Serial Console in Python & Tkinter.
 """
 
 
+import time
 import datetime
-
 
 import tkinter as tk
 from tkinter import ttk
@@ -123,18 +123,20 @@ class SSC(tk.Frame):
         # pylint: disable=no-self-use
 
         while not thread_event.is_set():
-            read = serial_reference.read(serial_reference.in_waiting)
-            if len(read) > 0:
+            if serial_reference.in_waiting > 0:
+                read = serial_reference.read(serial_reference.in_waiting)
                 try:
                     self.queue_comm_in.put_nowait(
                         (read, datetime.datetime.now()))
                 except queue.Full:
                     pass
+            else:
+                time.sleep(0.01)    # nothing to read, take a break
 
             try:
                 msg = self.queue_comm_out.get_nowait()
                 serial_reference.write(msg)
-                serial_reference.flush()
+                #serial_reference.flush()
             except queue.Empty:
                 pass
 
