@@ -17,6 +17,37 @@ import serial
 from serial.tools import list_ports
 
 
+
+class ToolTip:
+    """
+    Displays tooltip for a given widget.
+
+    Pieced together from stack overflov:
+
+    https://stackoverflow.com/questions/3221956/how-do-i-display-tooltips-in-tkinter
+    """
+
+    def __init__(self, widget, text=None):
+
+        def on_enter(event):
+            self.tooltip = tk.Toplevel()
+            self.tooltip.overrideredirect(True)
+            self.tooltip.geometry(f'+{event.x_root+15}+{event.y_root+10}')
+
+            self.label = tk.Label(self.tooltip, text=self.text)
+            self.label.pack()
+
+        def on_leave(event):
+            self.tooltip.destroy()
+
+        self.widget = widget
+        self.text = text
+
+        self.widget.bind('<Enter>', on_enter)
+        self.widget.bind('<Leave>', on_leave)
+
+
+
 class SSC(tk.Frame):
     """
     Main program GUI and logic class.
@@ -297,6 +328,14 @@ class SSC(tk.Frame):
 
         # set states
         self.button_transmit_data['state'] = 'disable'
+
+        # add tooltips
+        ToolTip(self.combo_control_port, text="PORT")
+        ToolTip(self.combo_control_baudrate, text="BAUDRATE")
+        ToolTip(self.combo_control_bytesize, text="BYTE SIZE")
+        ToolTip(self.combo_control_parity, text="PARITY")
+        ToolTip(self.combo_control_stopbit, text="STOP BITS")
+        ToolTip(self.combo_control_flow, text="FLOW CONTROL")
 
     def button_control_connection_handle(self):
         """
