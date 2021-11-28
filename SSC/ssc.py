@@ -12,7 +12,6 @@ from tkinter import ttk
 import queue
 
 import threading
-from tkinter.constants import TRUE
 
 import serial
 from serial.tools import list_ports
@@ -104,7 +103,8 @@ class SSC(tk.Frame):
 
             if ui_update:
                 # save scrollbar state to handle autoscroll
-                scrollbar_state_y_previous = self.scrollbar_display_text.get()[1]
+                scrollbar_state_y_previous = self.scrollbar_display_text.get()[
+                    1]
 
                 if self.check_receive_timestamp_varible.get():
                     self.text_display_content.insert(
@@ -136,7 +136,7 @@ class SSC(tk.Frame):
             try:
                 msg = self.queue_comm_out.get_nowait()
                 serial_reference.write(msg)
-                #serial_reference.flush()
+                # serial_reference.flush()
             except queue.Empty:
                 pass
 
@@ -152,31 +152,47 @@ class SSC(tk.Frame):
         self.frame_transmit = ttk.Frame(self.frame_root)
         self.frame_history = ttk.Frame(self.frame_root)
 
-        # control - open/close, settings, ...
+        ### control - open/close, settings, ...
         self.button_control_connection = ttk.Button(
             self.frame_control, command=self.button_control_connection_handle,
             text="open")
         self.button_control_connection.pack(side=tk.LEFT)
 
+        # port selection
         self.combo_control_port_variable = tk.StringVar()
         self.combo_control_port = ttk.Combobox(
             self.frame_control,
             textvariable=self.combo_control_port_variable,
-            postcommand=self.combo_control_port_update)
+            postcommand=self.combo_control_port_update,
+            width=13)
         self.combo_control_port.bind(
             '<<ComboboxSelected>>',
             self.combo_control_port_bind_select)
         self.combo_control_port.pack(side=tk.LEFT)
 
+        # baudrate selection
         self.combo_control_baudrate_variable = tk.StringVar()
         self.combo_control_baudrate = ttk.Combobox(
             self.frame_control,
             textvariable=self.combo_control_baudrate_variable,
-            postcommand=self.combo_control_baudrate_update)
+            postcommand=self.combo_control_baudrate_update,
+            width=9)
         self.combo_control_baudrate.bind(
             '<<ComboboxSelected>>',
             self.combo_control_baudrate_bind_select)
         self.combo_control_baudrate.pack(side=tk.LEFT)
+
+        # bytesize selection
+        self.combo_control_bytesize_variable = tk.StringVar()
+        self.combo_control_bytesize = ttk.Combobox(
+            self.frame_control,
+            textvariable=self.combo_control_bytesize_variable,
+            postcommand=self.combo_control_bytesize_update,
+            width=3)
+        self.combo_control_bytesize.bind(
+            '<<ComboboxSelected>>',
+            self.combo_control_bytesize_bind_select)
+        self.combo_control_bytesize.pack(side=tk.LEFT)
 
         # display - display serial output ...
         self.text_display_content = tk.Text(self.frame_display, height=19)
@@ -238,6 +254,7 @@ class SSC(tk.Frame):
         # populate menus
         self.combo_control_port_update()
         self.combo_control_baudrate_update()
+        self.combo_control_bytesize_update()
 
         # set states
         self.button_transmit_data['state'] = 'disable'
@@ -260,6 +277,14 @@ class SSC(tk.Frame):
             # connection is closed, open it & handle UI changes
             self.serial_connection.port = self.combo_control_port_variable.get()
             self.serial_connection.baudrate = self.combo_control_baudrate_variable.get()
+            if self.combo_control_bytesize_variable.get() == "5":
+                self.serial_connection.bytesize = serial.FIVEBITS
+            elif self.combo_control_bytesize_variable.get() == "6":
+                self.serial_connection.bytesize = serial.SIXBITS
+            elif self.combo_control_bytesize_variable.get() == "7":
+                self.serial_connection.bytesize = serial.SEVENBITS
+            else:
+                self.serial_connection.bytesize = serial.EIGHTBITS
             # TODO - set other parameters
             try:
                 self.serial_connection.open()
@@ -288,6 +313,7 @@ class SSC(tk.Frame):
 
             self.combo_control_port['state'] = 'disable'
             self.combo_control_baudrate['state'] = 'disable'
+            self.combo_control_bytesize['state'] = 'disable'
         else:
             self.button_control_connection['text'] = "open"
 
@@ -295,6 +321,7 @@ class SSC(tk.Frame):
 
             self.combo_control_port['state'] = 'readonly'
             self.combo_control_baudrate['state'] = 'readonly'
+            self.combo_control_bytesize['state'] = 'readonly'
 
     def combo_control_port_update(self):
         """
@@ -366,7 +393,7 @@ class SSC(tk.Frame):
         if not prev_selection:
             # no previous selection
             if len(baudrate_list) > 1:
-                # select last ddefault baudrate
+                # select last default baudrate
                 self.combo_control_baudrate.current(len(baudrate_list) - 6)
                 self.combo_control_baudrate['state'] = 'readonly'
             else:
@@ -376,7 +403,7 @@ class SSC(tk.Frame):
 
     def combo_control_baudrate_bind_select(self, _event=None):
         """
-        Handle selection of port from combobox.
+        Handle selection of baudrate from combobox.
         """
 
         prev_selection = self.combo_control_baudrate_variable.get()
@@ -388,6 +415,45 @@ class SSC(tk.Frame):
         else:
             self.combo_control_baudrate['state'] = 'readonly'
             self.combo_control_baudrate.selection_clear()
+
+    def combo_control_bytesize_update(self):
+        """
+        Handle bytesize menu
+        """
+
+        prev_selection = self.combo_control_bytesize_variable.get()
+
+        # find available serial ports
+        bytesize_list = []
+        bytesize_list.append("5")
+        bytesize_list.append("6")
+        bytesize_list.append("7")
+        bytesize_list.append("8")
+
+        self.combo_control_bytesize['values'] = bytesize_list
+
+        if prev_selection not in bytesize_list:
+            prev_selection = ""
+
+        if not prev_selection:
+            # no previous selection
+            self.combo_control_bytesize.current(len(bytesize_list) - 1)
+            self.combo_control_bytesize['state'] = 'readonly'
+
+    def combo_control_bytesize_bind_select(self, _event=None):
+        """
+        Handle selection of port from combobox.
+        """
+
+        prev_selection = self.combo_control_bytesize_variable.get()
+        comport_list = self.combo_control_bytesize['values']
+
+        # toggle widget state - disable editing for non CUSTOM selections
+        if comport_list.index(prev_selection) == len(comport_list) - 1:
+            self.combo_control_bytesize['state'] = 'normal'
+        else:
+            self.combo_control_bytesize['state'] = 'readonly'
+            self.combo_control_bytesize.selection_clear()
 
     def button_transmit_data_handle(self):
         """
