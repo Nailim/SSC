@@ -493,15 +493,7 @@ class SSC(tk.Frame):
         Handle selection of port from combobox.
         """
 
-        prev_selection = self.combo_control_bytesize_variable.get()
-        comport_list = self.combo_control_bytesize['values']
-
-        # toggle widget state - disable editing for non CUSTOM selections
-        if comport_list.index(prev_selection) == len(comport_list) - 1:
-            self.combo_control_bytesize['state'] = 'normal'
-        else:
-            self.combo_control_bytesize['state'] = 'readonly'
-            self.combo_control_bytesize.selection_clear()
+        self.combo_control_bytesize.selection_clear()
 
     def combo_control_parity_update(self):
         """
@@ -533,15 +525,7 @@ class SSC(tk.Frame):
         Handle selection of parity from combobox.
         """
 
-        prev_selection = self.combo_control_parity_variable.get()
-        comport_list = self.combo_control_parity['values']
-
-        # toggle widget state - disable editing for non CUSTOM selections
-        if comport_list.index(prev_selection) == len(comport_list) - 1:
-            self.combo_control_parity['state'] = 'normal'
-        else:
-            self.combo_control_parity['state'] = 'readonly'
-            self.combo_control_parity.selection_clear()
+        self.combo_control_parity.selection_clear()
 
     def combo_control_stopbit_update(self):
         """
