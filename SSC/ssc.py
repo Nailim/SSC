@@ -194,6 +194,18 @@ class SSC(tk.Frame):
             self.combo_control_bytesize_bind_select)
         self.combo_control_bytesize.pack(side=tk.LEFT)
 
+        # parity selection
+        self.combo_control_parity_variable = tk.StringVar()
+        self.combo_control_parity = ttk.Combobox(
+            self.frame_control,
+            textvariable=self.combo_control_parity_variable,
+            postcommand=self.combo_control_parity_update,
+            width=7)
+        self.combo_control_parity.bind(
+            '<<ComboboxSelected>>',
+            self.combo_control_parity_bind_select)
+        self.combo_control_parity.pack(side=tk.LEFT)
+
         # display - display serial output ...
         self.text_display_content = tk.Text(self.frame_display, height=19)
         self.text_display_content.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
@@ -255,6 +267,7 @@ class SSC(tk.Frame):
         self.combo_control_port_update()
         self.combo_control_baudrate_update()
         self.combo_control_bytesize_update()
+        self.combo_control_parity_update()
 
         # set states
         self.button_transmit_data['state'] = 'disable'
@@ -276,7 +289,9 @@ class SSC(tk.Frame):
         else:
             # connection is closed, open it & handle UI changes
             self.serial_connection.port = self.combo_control_port_variable.get()
+
             self.serial_connection.baudrate = self.combo_control_baudrate_variable.get()
+
             if self.combo_control_bytesize_variable.get() == "5":
                 self.serial_connection.bytesize = serial.FIVEBITS
             elif self.combo_control_bytesize_variable.get() == "6":
@@ -285,6 +300,17 @@ class SSC(tk.Frame):
                 self.serial_connection.bytesize = serial.SEVENBITS
             else:
                 self.serial_connection.bytesize = serial.EIGHTBITS
+            
+            if self.combo_control_parity_variable.get() == "SPACE":
+                self.serial_connection.parity = serial.PARITY_SPACE
+            elif self.combo_control_parity_variable.get() == "MARK":
+                self.serial_connection.parity = serial.PARITY_MARK
+            elif self.combo_control_parity_variable.get() == "ODD":
+                self.serial_connection.parity = serial.PARITY_ODD
+            elif self.combo_control_parity_variable.get() == "EVEN":
+                self.serial_connection.parity = serial.PARITY_EVEN
+            else:
+                self.serial_connection.parity = serial.PARITY_NONE
             # TODO - set other parameters
             try:
                 self.serial_connection.open()
@@ -314,6 +340,7 @@ class SSC(tk.Frame):
             self.combo_control_port['state'] = 'disable'
             self.combo_control_baudrate['state'] = 'disable'
             self.combo_control_bytesize['state'] = 'disable'
+            self.combo_control_parity['state'] = 'disable'
         else:
             self.button_control_connection['text'] = "open"
 
@@ -322,6 +349,7 @@ class SSC(tk.Frame):
             self.combo_control_port['state'] = 'readonly'
             self.combo_control_baudrate['state'] = 'readonly'
             self.combo_control_bytesize['state'] = 'readonly'
+            self.combo_control_parity['state'] = 'readonly'
 
     def combo_control_port_update(self):
         """
@@ -454,6 +482,46 @@ class SSC(tk.Frame):
         else:
             self.combo_control_bytesize['state'] = 'readonly'
             self.combo_control_bytesize.selection_clear()
+
+    def combo_control_parity_update(self):
+        """
+        Handle parity menu
+        """
+
+        prev_selection = self.combo_control_parity_variable.get()
+
+        # find available serial ports
+        parity_list = []
+        parity_list.append("NONE")
+        parity_list.append("EVEN")
+        parity_list.append("ODD")
+        parity_list.append("MARK")
+        parity_list.append("SPACE")
+
+        self.combo_control_parity['values'] = parity_list
+
+        if prev_selection not in parity_list:
+            prev_selection = ""
+
+        if not prev_selection:
+            # no previous selection
+            self.combo_control_parity.current(0)
+            self.combo_control_parity['state'] = 'readonly'
+
+    def combo_control_parity_bind_select(self, _event=None):
+        """
+        Handle selection of parity from combobox.
+        """
+
+        prev_selection = self.combo_control_parity_variable.get()
+        comport_list = self.combo_control_parity['values']
+
+        # toggle widget state - disable editing for non CUSTOM selections
+        if comport_list.index(prev_selection) == len(comport_list) - 1:
+            self.combo_control_parity['state'] = 'normal'
+        else:
+            self.combo_control_parity['state'] = 'readonly'
+            self.combo_control_parity.selection_clear()
 
     def button_transmit_data_handle(self):
         """
