@@ -206,6 +206,18 @@ class SSC(tk.Frame):
             self.combo_control_parity_bind_select)
         self.combo_control_parity.pack(side=tk.LEFT)
 
+        # stopbit selection
+        self.combo_control_stopbit_variable = tk.StringVar()
+        self.combo_control_stopbit = ttk.Combobox(
+            self.frame_control,
+            textvariable=self.combo_control_stopbit_variable,
+            postcommand=self.combo_control_stopbit_update,
+            width=3)
+        self.combo_control_stopbit.bind(
+            '<<ComboboxSelected>>',
+            self.combo_control_stopbit_bind_select)
+        self.combo_control_stopbit.pack(side=tk.LEFT)
+
         # display - display serial output ...
         self.text_display_content = tk.Text(self.frame_display, height=19)
         self.text_display_content.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
@@ -268,6 +280,7 @@ class SSC(tk.Frame):
         self.combo_control_baudrate_update()
         self.combo_control_bytesize_update()
         self.combo_control_parity_update()
+        self.combo_control_stopbit_update()
 
         # set states
         self.button_transmit_data['state'] = 'disable'
@@ -311,6 +324,11 @@ class SSC(tk.Frame):
                 self.serial_connection.parity = serial.PARITY_EVEN
             else:
                 self.serial_connection.parity = serial.PARITY_NONE
+
+            if self.combo_control_stopbit_variable.get() == "2":
+                self.serial_connection.stopbit = serial.STOPBITS_TWO
+            else:
+                self.serial_connection.stopbit = serial.STOPBITS_ONE
             # TODO - set other parameters
             try:
                 self.serial_connection.open()
@@ -341,6 +359,7 @@ class SSC(tk.Frame):
             self.combo_control_baudrate['state'] = 'disable'
             self.combo_control_bytesize['state'] = 'disable'
             self.combo_control_parity['state'] = 'disable'
+            self.combo_control_stopbit['state'] = 'disable'
         else:
             self.button_control_connection['text'] = "open"
 
@@ -350,6 +369,7 @@ class SSC(tk.Frame):
             self.combo_control_baudrate['state'] = 'readonly'
             self.combo_control_bytesize['state'] = 'readonly'
             self.combo_control_parity['state'] = 'readonly'
+            self.combo_control_stopbit['state'] = 'readonly'
 
     def combo_control_port_update(self):
         """
@@ -522,6 +542,35 @@ class SSC(tk.Frame):
         else:
             self.combo_control_parity['state'] = 'readonly'
             self.combo_control_parity.selection_clear()
+
+    def combo_control_stopbit_update(self):
+        """
+        Handle stopbit menu
+        """
+
+        prev_selection = self.combo_control_stopbit_variable.get()
+
+        # find available serial ports
+        stopbit_list = []
+        stopbit_list.append("1")
+        stopbit_list.append("2")
+
+        self.combo_control_stopbit['values'] = stopbit_list
+
+        if prev_selection not in stopbit_list:
+            prev_selection = ""
+
+        if not prev_selection:
+            # no previous selection
+            self.combo_control_stopbit.current(0)
+            self.combo_control_stopbit['state'] = 'readonly'
+
+    def combo_control_stopbit_bind_select(self, _event=None):
+        """
+        Handle selection of stopbit from combobox.
+        """
+
+        self.combo_control_stopbit.selection_clear()
 
     def button_transmit_data_handle(self):
         """
