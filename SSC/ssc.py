@@ -17,7 +17,6 @@ import serial
 from serial.tools import list_ports
 
 
-
 class ToolTip:
     """
     Displays tooltip for a given widget.
@@ -27,25 +26,70 @@ class ToolTip:
     https://stackoverflow.com/questions/3221956/how-do-i-display-tooltips-in-tkinter
     """
 
-    def __init__(self, widget, text=None):
-
-        def on_enter(event):
-            self.tooltip = tk.Toplevel()
-            self.tooltip.overrideredirect(True)
-            self.tooltip.geometry(f'+{event.x_root+15}+{event.y_root+10}')
-
-            self.label = tk.Label(self.tooltip, text=self.text)
-            self.label.pack()
-
-        def on_leave(event):
-            self.tooltip.destroy()
+    def __init__(self, widget, text=None, delay=250):
 
         self.widget = widget
         self.text = text
+        self.delay = delay
 
-        self.widget.bind('<Enter>', on_enter)
-        self.widget.bind('<Leave>', on_leave)
+        self.tooltip = None
+        self.event_id = None
 
+        self.widget.bind('<Enter>', self.on_enter)
+        self.widget.bind('<Leave>', self.on_leave)
+
+    def on_enter(self, event=None):
+        """
+        Wrapper for ENTER event
+        """
+
+        self.schedule()
+
+    def on_leave(self, event=None):
+        """
+        Wrapper for LEAVE event
+        """
+
+        self.unschedule()
+        self.hide()
+
+    def schedule(self):
+        """
+        Schedule tooltip event
+        """
+
+        self.unschedule()
+        self.event_id = self.widget.after(self.delay, self.show)
+
+    def unschedule(self):
+        """
+        Unschedule tooltip event
+        """
+
+        if self.event_id:
+            self.widget.after_cancel(self.event_id)
+            self.event_id = None
+
+    def show(self):
+        """
+        Display and format the actuall toltip
+        """
+
+        self.tooltip = tk.Toplevel(self.widget)
+        self.tooltip.overrideredirect(True)
+        self.tooltip.geometry(
+            f'+{self.widget.winfo_rootx()+0}+{self.widget.winfo_rooty()-self.widget.winfo_height()}')
+
+        label = tk.Label(self.tooltip, text=self.text)
+        label.pack()
+
+    def hide(self):
+        """
+        Destroy the displayed tooltip
+        """
+
+        if self.tooltip:
+            self.tooltip.destroy()
 
 
 class SSC(tk.Frame):
