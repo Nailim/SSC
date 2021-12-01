@@ -26,11 +26,20 @@ class ToolTip:
     https://stackoverflow.com/questions/3221956/how-do-i-display-tooltips-in-tkinter
     """
 
-    def __init__(self, widget, text=None, delay=250):
+    def __init__(
+            self,
+            widget,
+            text=None,
+            delay=250,
+            follow_pointer=True,
+            background="#FFFFE0"):
 
         self.widget = widget
         self.text = text
         self.delay = delay
+        # show tooltip next to pointer (true) or abowe the widget (false)
+        self.follow_pointer = follow_pointer
+        self.background = background
 
         self.tooltip = None
         self.event_id = None
@@ -76,11 +85,29 @@ class ToolTip:
         """
 
         self.tooltip = tk.Toplevel(self.widget)
-        self.tooltip.overrideredirect(True)
-        self.tooltip.geometry(
-            f'+{self.widget.winfo_rootx()+0}+{self.widget.winfo_rooty()-self.widget.winfo_height()}')
+        label = tk.Label(
+            self.tooltip,
+            text=self.text,
+            justify=tk.CENTER,
+            background=self.background)
 
-        label = tk.Label(self.tooltip, text=self.text)
+        self.tooltip.overrideredirect(True)
+
+        geo_x = 0
+        geo_y = 0
+
+        if self.follow_pointer:
+            # if tooltip next to pointer calculate position out of widget
+            geo_x = self.widget.winfo_pointerx() + 5
+            geo_y = self.widget.winfo_rooty() + self.widget.winfo_height() + 5
+        else:
+            # if tooltip above widget calculate position at the widget center
+            geo_x = self.widget.winfo_rootx() + int((self.widget.winfo_width() / 2) -
+                                                    (label.winfo_reqwidth() / 2))
+            geo_y = self.widget.winfo_rooty() - self.widget.winfo_height() - 5
+
+        self.tooltip.geometry(f'+{geo_x}+{geo_y}')
+
         label.pack()
 
     def hide(self):
@@ -374,12 +401,27 @@ class SSC(tk.Frame):
         self.button_transmit_data['state'] = 'disable'
 
         # add tooltips
-        ToolTip(self.combo_control_port, text="PORT")
-        ToolTip(self.combo_control_baudrate, text="BAUDRATE")
-        ToolTip(self.combo_control_bytesize, text="BYTE SIZE")
-        ToolTip(self.combo_control_parity, text="PARITY")
-        ToolTip(self.combo_control_stopbit, text="STOP BITS")
-        ToolTip(self.combo_control_flow, text="FLOW CONTROL")
+        ToolTip(
+            self.combo_control_port,
+            text="DEVICE PORT",
+            follow_pointer=False)
+        ToolTip(
+            self.combo_control_baudrate,
+            text="BAUDRATE",
+            follow_pointer=False)
+        ToolTip(
+            self.combo_control_bytesize,
+            text="BYTE SIZE",
+            follow_pointer=False)
+        ToolTip(self.combo_control_parity, text="PARITY", follow_pointer=False)
+        ToolTip(
+            self.combo_control_stopbit,
+            text="STOP BITS",
+            follow_pointer=False)
+        ToolTip(
+            self.combo_control_flow,
+            text="FLOW CONTROL",
+            follow_pointer=False)
 
     def button_control_connection_handle(self):
         """
