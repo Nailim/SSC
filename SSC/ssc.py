@@ -808,28 +808,8 @@ class SSC(tk.Frame):
         Handle double click on history list box
         """
 
-        if self.serial_connection.is_open:
-            input_data = self.listbox_history.get(tk.ACTIVE)
-            input_ending = self.option_transmit_ending_variable.get()
+        self.transmit_data_handle()
 
-            transmit_data = input_data.encode()
-
-            if input_ending == " LF ":
-                transmit_data = transmit_data + str.encode("\n")
-            elif input_ending == " CR ":
-                transmit_data = transmit_data + str.encode("\r")
-            elif input_ending == "CRLF":
-                transmit_data = transmit_data + str.encode("\r\n")
-            else:
-                pass
-
-            if len(transmit_data) > 0:
-                self.queue_comm_out.put(transmit_data)
-
-        # clear input field and set focus on input field
-        # TODO - double click also calls single click
-        self.entry_transmit_data.delete(0, tk.END)
-        self.entry_transmit_data.focus()
 
 
 def main():
