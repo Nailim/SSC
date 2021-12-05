@@ -784,6 +784,12 @@ class SSC(tk.Frame):
             self.queue_comm_out.put(transmit_data)
 
         if len(input_data) > 0:
+            # if value already in history, remove from list
+            lb_hist_tuple = self.listbox_history.get(0, tk.END)
+            if input_data in lb_hist_tuple:
+                self.listbox_history.delete(lb_hist_tuple.index(input_data))
+
+            # add value to top of the list
             self.listbox_history.insert(0, input_data)
 
         # clear input field and set focus on input field
