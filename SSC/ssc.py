@@ -52,12 +52,16 @@ class ToolTip:
         Wrapper for ENTER event
         """
 
+        # pylint: disable=unused-argument
+
         self.schedule()
 
     def on_leave(self, event=None):
         """
         Wrapper for LEAVE event
         """
+
+        # pylint: disable=unused-argument
 
         self.unschedule()
         self.hide()
