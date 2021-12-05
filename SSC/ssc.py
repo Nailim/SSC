@@ -380,7 +380,14 @@ class SSC(tk.Frame):
         self.listbox_history.bind(
             '<Double-Button-1>',
             self.listbox_history_bind_double_button)
-        self.listbox_history.pack(fill=tk.BOTH, expand=True)
+        self.listbox_history.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        # self.text_display_content.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        self.scrollbar_history_text = ttk.Scrollbar(
+            self.frame_history, command=self.listbox_history.yview)
+        self.scrollbar_history_text.pack(side=tk.LEFT, fill=tk.Y)
+        self.listbox_history['yscrollcommand'] = self.scrollbar_history_text.set
 
         # assemble frames into main window
         self.frame_control.pack(side=tk.TOP, fill=tk.X, expand=False)
