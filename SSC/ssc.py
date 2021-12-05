@@ -47,21 +47,17 @@ class ToolTip:
         self.widget.bind('<Enter>', self.on_enter)
         self.widget.bind('<Leave>', self.on_leave)
 
-    def on_enter(self, event=None):
+    def on_enter(self, _event=None):
         """
         Wrapper for ENTER event
         """
 
-        # pylint: disable=unused-argument
-
         self.schedule()
 
-    def on_leave(self, event=None):
+    def on_leave(self, _event=None):
         """
         Wrapper for LEAVE event
         """
-
-        # pylint: disable=unused-argument
 
         self.unschedule()
         self.hide()
@@ -369,7 +365,7 @@ class SSC(tk.Frame):
         self.option_transmit_ending.pack(side=tk.LEFT)
 
         self.button_transmit_data = ttk.Button(
-            self.frame_transmit, command=self.button_transmit_data_handle,
+            self.frame_transmit, command=self.transmit_data_handle,
             text="send")
         self.button_transmit_data.pack(side=tk.RIGHT)
 
@@ -517,6 +513,8 @@ class SSC(tk.Frame):
 
         # change GUI to match changed state
         if self.serial_connection.is_open:
+            # connection is open
+
             self.button_control_connection['text'] = "close"
 
             self.button_transmit_data['state'] = 'normal'
@@ -527,7 +525,11 @@ class SSC(tk.Frame):
             self.combo_control_parity['state'] = 'disable'
             self.combo_control_stopbit['state'] = 'disable'
             self.combo_control_flow['state'] = 'disable'
+
+            self.entry_transmit_data.bind('<Return>', self.transmit_data_handle)
         else:
+            # connection is closed
+
             self.button_control_connection['text'] = "open"
 
             self.button_transmit_data['state'] = 'disable'
@@ -538,6 +540,8 @@ class SSC(tk.Frame):
             self.combo_control_parity['state'] = 'readonly'
             self.combo_control_stopbit['state'] = 'readonly'
             self.combo_control_flow['state'] = 'readonly'
+
+            self.entry_transmit_data.unbind('<Return>')
 
     def combo_control_port_update(self):
         """
@@ -755,10 +759,11 @@ class SSC(tk.Frame):
 
         self.combo_control_flow.selection_clear()
 
-    def button_transmit_data_handle(self):
+    def transmit_data_handle(self, _event=None):
         """
-        Handle send button
+        Handle send event
         """
+
         input_data = self.entry_transmit_data_variable.get()
         input_ending = self.option_transmit_ending_variable.get()
 
