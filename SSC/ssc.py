@@ -527,6 +527,8 @@ class SSC(tk.Frame):
             self.combo_control_flow['state'] = 'disable'
 
             self.entry_transmit_data.bind('<Return>', self.transmit_data_handle)
+
+            self.entry_transmit_data.focus()
         else:
             # connection is closed
 
