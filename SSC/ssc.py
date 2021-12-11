@@ -225,7 +225,7 @@ class SSC(tk.Frame):
                 else:
                     # get ascii string without special characters, replace any
                     # new line combination with tkinter text newline
-                    msg_data = str(msg_data, "ascii")
+                    msg_data = str(msg_data, "ascii", errors='replace')
                     msg_data = re.sub(r"(\n\r|\r\n|\n|\r)", "\n", msg_data)
 
                 # add text to display
@@ -371,7 +371,7 @@ class SSC(tk.Frame):
         self.check_receive_ctrl_char = ttk.Checkbutton(
             self.frame_receive,
             variable=self.check_receive_ctrl_char_varible,
-            text='control characters')
+            text='byte string')
         self.check_receive_ctrl_char.pack(side=tk.LEFT)
 
         # tansmit - transit control, data ...
