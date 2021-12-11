@@ -2,6 +2,7 @@
 Simple Serial Console in Python & Tkinter.
 """
 
+import re
 
 import time
 import datetime
@@ -208,11 +209,29 @@ class SSC(tk.Frame):
                 scrollbar_state_y_previous = self.scrollbar_display_text.get()[
                     1]
 
+                # handle timestamp display
                 if self.check_receive_timestamp_varible.get():
                     self.text_display_content.insert(
                         tk.END, "[" + msg_time.strftime("%H:%M:%S.%f")[:-3] + "] ")
+
+                # handle control character display
+                if self.check_receive_ctrl_char_varible.get():
+                    # get byte string, remove b'' tags,
+                    # add new line for tkinter text
+                    msg_data = str(msg_data)
+                    msg_data = msg_data[2:-1]
+                    msg_data = re.sub(
+                        r"(\\n\\r|\\r\\n|\n|\r)", r"\1\n", msg_data)
+                else:
+                    # get ascii string without special characters, replace any
+                    # new line combination with tkinter text newline
+                    msg_data = str(msg_data, "ascii")
+                    msg_data = re.sub(r"(\n\r|\r\n|\n|\r)", "\n", msg_data)
+
+                # add text to display
                 self.text_display_content.insert(tk.END, msg_data)
 
+                # handle scrool bar
                 if scrollbar_state_y_previous == 1.0:
                     # only scroll text to botom if already showing bottom
                     self.text_display_content.see(tk.END)
@@ -347,6 +366,13 @@ class SSC(tk.Frame):
             self.frame_receive,
             variable=self.check_receive_timestamp_varible, text='timestamp')
         self.check_receive_timestamp.pack(side=tk.LEFT)
+
+        self.check_receive_ctrl_char_varible = tk.BooleanVar()
+        self.check_receive_ctrl_char = ttk.Checkbutton(
+            self.frame_receive,
+            variable=self.check_receive_ctrl_char_varible,
+            text='control characters')
+        self.check_receive_ctrl_char.pack(side=tk.LEFT)
 
         # tansmit - transit control, data ...
         self.entry_transmit_data_variable = tk.StringVar()
@@ -526,7 +552,8 @@ class SSC(tk.Frame):
             self.combo_control_stopbit['state'] = 'disable'
             self.combo_control_flow['state'] = 'disable'
 
-            self.entry_transmit_data.bind('<Return>', self.transmit_data_handle)
+            self.entry_transmit_data.bind(
+                '<Return>', self.transmit_data_handle)
 
             self.entry_transmit_data.focus()
         else:
@@ -815,7 +842,6 @@ class SSC(tk.Frame):
         """
 
         self.transmit_data_handle()
-
 
 
 def main():
