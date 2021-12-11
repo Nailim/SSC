@@ -228,6 +228,23 @@ class SSC(tk.Frame):
                     msg_data = str(msg_data, "ascii", errors='replace')
                     msg_data = re.sub(r"(\n\r|\r\n|\n|\r)", "\n", msg_data)
 
+                # remove if more lines then desired hostory
+                try:
+                    tmp_hist_size = int(
+                        self.entry_transmit_history_size_variable.get())
+                    tmp_text_size = int(self.text_display_content.index(
+                        'end-1c').split('.', maxsplit=1)[0])
+
+                    if tmp_text_size > tmp_hist_size:
+                        while tmp_text_size > tmp_hist_size:
+                            # delete access lines
+                            self.text_display_content.delete("1.0", "2.0")
+                            tmp_text_size = int(self.text_display_content.index(
+                                'end-1c').split('.', maxsplit=1)[0])
+                except tk.TclError:
+                    # not a valid history size - ignore
+                    pass
+
                 # add text to display
                 self.text_display_content.insert(tk.END, msg_data)
 
@@ -273,7 +290,7 @@ class SSC(tk.Frame):
         self.frame_transmit = ttk.Frame(self.frame_root)
         self.frame_history = ttk.Frame(self.frame_root)
 
-        ### control - open/close, settings, ...
+        # control - open/close, settings, ...
         self.button_control_connection = ttk.Button(
             self.frame_control, command=self.button_control_connection_handle,
             text="open")
@@ -374,6 +391,28 @@ class SSC(tk.Frame):
             text='byte string')
         self.check_receive_ctrl_char.pack(side=tk.LEFT)
 
+        self.entry_transmit_history_size_variable = tk.IntVar()
+        self.entry_transmit_history_size = ttk.Entry(
+            self.frame_receive,
+            validate="key",
+            validatecommand=(
+                self.frame_receive.register(
+                    self.entry_transmit_history_size_validate),
+                '%d',
+                '%i',
+                '%P',
+                '%s',
+                '%S',
+                '%v',
+                '%V',
+                '%W'),
+            textvariable=self.entry_transmit_history_size_variable)
+        self.entry_transmit_history_size.pack(side=tk.LEFT)
+
+        self.entry_receive_label_history = ttk.Label(
+            self.frame_receive, text="history size")
+        self.entry_receive_label_history.pack(side=tk.LEFT)
+
         # tansmit - transit control, data ...
         self.entry_transmit_data_variable = tk.StringVar()
         self.entry_transmit_data = ttk.Entry(
@@ -408,7 +447,8 @@ class SSC(tk.Frame):
             self.listbox_history_bind_double_button)
         self.listbox_history.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        # self.text_display_content.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        # self.text_display_content.pack(side=tk.LEFT, fill=tk.BOTH,
+        # expand=True)
 
         self.scrollbar_history_text = ttk.Scrollbar(
             self.frame_history, command=self.listbox_history.yview)
@@ -429,6 +469,8 @@ class SSC(tk.Frame):
         self.combo_control_parity_update()
         self.combo_control_stopbit_update()
         self.combo_control_flow_update()
+
+        self.entry_transmit_history_size_update()
 
         # set states
         self.button_transmit_data['state'] = 'disable'
@@ -780,6 +822,41 @@ class SSC(tk.Frame):
             # no previous selection
             self.combo_control_flow.current(0)
             self.combo_control_flow['state'] = 'readonly'
+
+    def entry_transmit_history_size_update(self):
+        """
+        Handle history size value
+        """
+
+        self.entry_transmit_history_size_variable.set(1024)
+
+    def entry_transmit_history_size_validate(
+            self,
+            _action,
+            _index,
+            _value_if_allowed,
+            _prior_value,
+            _text,
+            _validation_type,
+            _trigger_type,
+            _widget_name):
+        """
+        Handle history size value validation
+        """
+
+        if _value_if_allowed:
+            # if entry value is not empty
+            try:
+                int(_value_if_allowed)
+                return True
+            except ValueError:
+                return False
+        else:
+            # if entry is empty only
+            if _value_if_allowed == "":
+                return True
+            else:
+                return False
 
     def combo_control_flow_bind_select(self, _event=None):
         """
