@@ -378,6 +378,11 @@ class SSC(tk.Frame):
         self.text_display_content['yscrollcommand'] = self.scrollbar_display_text.set
 
         # receive - receive control, formatting, ...
+        self.button_receive_clear = ttk.Button(
+            self.frame_receive, command=self.button_receive_clear_handle,
+            text="clear")
+        self.button_receive_clear.pack(side=tk.LEFT)
+
         self.check_receive_timestamp_varible = tk.BooleanVar()
         self.check_receive_timestamp = ttk.Checkbutton(
             self.frame_receive,
@@ -822,6 +827,9 @@ class SSC(tk.Frame):
             # no previous selection
             self.combo_control_flow.current(0)
             self.combo_control_flow['state'] = 'readonly'
+
+    def button_receive_clear_handle(self):
+        self.text_display_content.delete("1.0", tk.END)
 
     def entry_transmit_history_size_update(self):
         """
